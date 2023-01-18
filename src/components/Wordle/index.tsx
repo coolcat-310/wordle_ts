@@ -2,6 +2,7 @@ import React, { FC, useEffect } from 'react';
 import {useGameProvider, ActionKind} from "../../hooks/useGameProvider";
 import {Nav} from "../Nav";
 import {generateWordSet} from "../../helpers";
+import {Board} from "../Board";
 
 export const Wordle: FC = () => {
     const { state, dispatch } = useGameProvider();
@@ -23,7 +24,7 @@ export const Wordle: FC = () => {
         <>
             <Nav />
             <div className="game">
-                wordle
+                <Board />
                 {state.gameOver ? "gameOver": "keep playing"}
             </div>
         </>
