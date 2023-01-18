@@ -21,10 +21,20 @@ const TestComponent: FC = () => {
         })
     };
 
+    const setEnter = ():void => {
+        dispatch({
+            type: ActionKind.ON_CLICK,
+            payload: {
+                keyVal: 'ENTER'
+            }
+        })
+    };
+
     return (
         <div>
             <p data-test-id="test-text">{JSON.stringify(state)}</p>
             <button onClick={setTemplate}>Set OnClick</button>
+            <button onClick={setEnter}>Set Enter</button>
             <p data-test-id="board-data">{JSON.stringify(state.gameBoard)}</p>
             <p data-test-id="letterPosition-data">{JSON.stringify(state.letterPosition)}</p>
         </div>
@@ -58,4 +68,16 @@ test('GameProvider retuns an altered gameboard when onclick is triggered', () =>
 
     expect(text).toHaveTextContent(JSON.stringify(newBoard));
     expect(letterPos).toHaveTextContent(JSON.stringify(initialState.letterPosition + 1));
+});
+
+test('GameProvider return default state on initial load', () => {
+    render(
+        <GameProvider>
+            <TestComponent />
+        </GameProvider>
+    );
+    const button = screen.getByRole('button', {name: /Set Enter/i});
+    userEvent.click(button);
+    const text = screen.getByTestId('test-text');
+    expect(text).toHaveTextContent(JSON.stringify(initialState));
 });

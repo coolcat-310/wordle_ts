@@ -1,10 +1,14 @@
 import React from 'react';
 import './App.css';
+import {GameProvider} from "./hooks/useGameProvider";
+import {Wordle} from "./components/Wordle";
 
 function App() {
   return (
     <div className="App">
-        wordle
+        <GameProvider>
+            <Wordle />
+        </GameProvider>
     </div>
   );
 }

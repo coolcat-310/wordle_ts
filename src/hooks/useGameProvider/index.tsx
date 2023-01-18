@@ -17,7 +17,9 @@ enum ActionKind {
 }
 
 type Payload = {
-    keyVal?: string
+    keyVal?: string,
+    todaysWord?: string,
+    wordSet?: string[]
 };
 
 type State = {
@@ -27,25 +29,51 @@ type State = {
     currentAttempt: number,
     letterPosition: number,
     keyVal?: string
+    todaysWord?: string
+    wordSet?: string[]
 };
 
 type Action = { type: ActionKind; payload: Payload };
 
 type Dispatch = (action: Action) => void;
 
-
-
-
-
 function gameReducer(state: State, action: Action) {
-
 
     switch(action.type) {
         case ActionKind.WORDS_SET: {
-            return {...state}
+            return { ...state, wordSet: action.payload.wordSet, todaysWord: action.payload.todaysWord }
         }
 
         case ActionKind.ON_CLICK: {
+            if(action.payload.keyVal === "ENTER") {
+                if(state.letterPosition !== 5) return {...state};
+
+                // if(state.currentAttempt === 4) return {...state, gameOver: true}
+
+                const currentWord = state.gameBoard[state.currentAttempt].reduce((a, v) => a + v, '');
+
+                if(currentWord === state.todaysWord) {
+                    return {...state, gameOver: true, guessWord: true}
+                }
+
+                if (state.wordSet?.includes(currentWord.toLowerCase())) {
+                    return {...state, currentAttempt: state.currentAttempt + 1, letterPosition: 0}
+                } else {
+                    alert("Word Not Found");
+                }
+            }
+
+            if(action.payload.keyVal === "DELETE" || action.payload.keyVal === "BACKSPACE"){
+                if(state.letterPosition === 0) return {...state};
+
+                const newBoard = [...state.gameBoard];
+                newBoard[state.currentAttempt][state.letterPosition - 1] = "";
+                return {
+                    ...state,
+                    letterPosition: state.letterPosition - 1,
+                }
+            }
+
             if ( state.letterPosition > 4) return {...state};
 
             if (!action.payload.keyVal) return {...state}
