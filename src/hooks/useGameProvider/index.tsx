@@ -48,7 +48,7 @@ function gameReducer(state: State, action: Action) {
             if(action.payload.keyVal === "ENTER") {
                 if(state.letterPosition !== 5) return {...state};
 
-                // if(state.currentAttempt === 4) return {...state, gameOver: true}
+                if(state.currentAttempt === 4) return {...state, gameOver: true}
 
                 const currentWord = state.gameBoard[state.currentAttempt].reduce((a, v) => a + v, '');
 
