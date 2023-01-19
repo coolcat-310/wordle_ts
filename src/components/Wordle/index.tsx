@@ -18,6 +18,7 @@ export const Wordle: FC = () => {
                     }
                 });
             });
+        // eslint-disable-next-line
     }, [])
 
     return (
