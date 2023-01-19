@@ -19,7 +19,8 @@ enum ActionKind {
 type Payload = {
     keyVal?: string,
     todaysWord?: string,
-    wordSet?: string[]
+    wordSet?: string[],
+    disabledLetter?: string,
 };
 
 type State = {
@@ -28,8 +29,8 @@ type State = {
     guessWord: boolean,
     currentAttempt: number,
     letterPosition: number,
-    keyVal?: string
-    todaysWord?: string
+    keyVal?: string,
+    todaysWord?: string,
     wordSet?: string[]
 };
 
@@ -87,6 +88,10 @@ function gameReducer(state: State, action: Action) {
             }
         }
 
+        case ActionKind.APPEND_DISABLE_LIST: {
+            return {...state}
+        }
+
         default: {
             throw new Error(`Unhandled action type ${action.type}`);
         }
@@ -103,6 +108,7 @@ export const initialState = {
     guessWord: false,
     currentAttempt: 0,
     letterPosition: 0,
+    todaysWord: ''
 }
 
 function GameProvider({children}: GameProviderProps){
