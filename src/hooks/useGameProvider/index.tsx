@@ -31,7 +31,8 @@ type State = {
     letterPosition: number,
     keyVal?: string,
     todaysWord?: string,
-    wordSet?: string[]
+    wordSet?: string[],
+    disabledSet?: string[]
 };
 
 type Action = { type: ActionKind; payload: Payload };
@@ -39,6 +40,8 @@ type Action = { type: ActionKind; payload: Payload };
 type Dispatch = (action: Action) => void;
 
 function gameReducer(state: State, action: Action) {
+
+    const {disabledSet = []} = state
 
     switch(action.type) {
         case ActionKind.WORDS_SET: {
@@ -89,7 +92,11 @@ function gameReducer(state: State, action: Action) {
         }
 
         case ActionKind.APPEND_DISABLE_LIST: {
-            return {...state}
+            const disabledLetter = action.payload.disabledLetter;
+
+            if(!disabledLetter) return {...state};
+
+            return {...state, disabledSet: [...disabledSet, disabledLetter]}
         }
 
         default: {
@@ -108,7 +115,7 @@ export const initialState = {
     guessWord: false,
     currentAttempt: 0,
     letterPosition: 0,
-    todaysWord: ''
+    todaysWord: '',
 }
 
 function GameProvider({children}: GameProviderProps){

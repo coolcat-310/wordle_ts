@@ -17,19 +17,19 @@ export const Letter:FC<LetterProps> = ({letterPosition, attemptValue}) => {
     const almost = !correct && letter !== "" && todaysWord.includes(letter);
     const letterState = (currentAttempt > attemptValue && correct) ? "correct": almost ? "almost" : "error";
 
-    // const isDisabledLetter: boolean = letter !== "" && !correct && !almost;
+    const isDisabledLetter: boolean = letter !== "" && !correct && !almost;
 
-    // useEffect(() => {
-    //     if(!isDisabledLetter) return;
-    //
-    //     dispatch({
-    //         type: ActionKind.APPEND_DISABLE_LIST,
-    //         payload: {
-    //             disabledLetter: letter
-    //         }
-    //     });
-    //     // eslint-disable-next-line
-    // }, [currentAttempt])
+    useEffect(() => {
+        if(!isDisabledLetter) return;
+
+        dispatch({
+            type: ActionKind.APPEND_DISABLE_LIST,
+            payload: {
+                disabledLetter: letter
+            }
+        });
+        // eslint-disable-next-line
+    }, [currentAttempt])
 
 
     return (
