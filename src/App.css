@@ -120,9 +120,35 @@ nav h1 {
   cursor: pointer;
 }
 
+/* New class for the disabled state */
+.key.disabled {
+  background-color: lightgrey; /* Lighter shade */
+  cursor: not-allowed;         /* Change cursor to indicate non-clickable */
+  pointer-events: none;   
+  background-color: black;      /* Disable all mouse events like click, hover */
+  color: #ccc;                  /* Lighter text color */
+}
+
 #big {
   width: 100px;
 }
 #disabled {
   background-color: #3a393c;
+}
+
+.container {
+  position: relative;
+}
+
+.notification {
+  position: fixed;
+  top: 0;
+  right: 0;
+  background-color: #ffff66; /* Warning yellow */
+  padding: 20px;
+  z-index: 1000; /* to ensure it is on top */
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  color: black;
 }

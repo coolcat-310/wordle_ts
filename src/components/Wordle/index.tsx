@@ -1,8 +1,12 @@
 import React, { FC, useEffect } from 'react';
-import {useGameProvider, ActionKind} from "../../hooks/useGameProvider";
+import {useGameProvider} from "../../hooks/useGameProvider";
 import {Nav} from "../Nav";
 import {generateWordSet} from "../../helpers";
 import {Board} from "../Board";
+import { KeyBoard } from '../KeyBoard';
+import { GameOver } from '../GameOver';
+import { Notification } from '../Notification';
+import { ActionKind } from '../../types';
 
 export const Wordle: FC = () => {
     const { state, dispatch } = useGameProvider();
@@ -18,15 +22,15 @@ export const Wordle: FC = () => {
                     }
                 });
             });
-        // eslint-disable-next-line
-    }, [])
+    }, []);
 
     return (
         <>
             <Nav />
+            {state.isError && <Notification />}
             <div className="game">
                 <Board />
-                {state.gameOver ? "gameOver": "keep playing"}
+                {state.gameOver ? <GameOver/>: <KeyBoard />}
             </div>
         </>
     )

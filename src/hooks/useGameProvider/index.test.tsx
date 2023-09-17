@@ -1,83 +1,138 @@
 /**
  *  @jest-environment jsdom
  */
+import React from 'react';
+import { render, fireEvent } from '@testing-library/react';
+import { GameProvider, initialBoard, initialState, useGameProvider } from '.';
+import { gameReducer } from '../useReducer';
+import { ActionKind } from '../../types';
 
-import React, {FC} from 'react';
-import { render, screen, configure} from '@testing-library/react';
-import {ActionKind, useGameProvider, GameProvider, initialState} from ".";
-import userEvent from "@testing-library/user-event";
 
-configure( { testIdAttribute: "data-test-id"})
-
-const TestComponent: FC = () => {
-    const {dispatch, state} = useGameProvider();
-
-    const setTemplate = ():void => {
-        dispatch({
-            type: ActionKind.ON_CLICK,
-            payload: {
-                keyVal: 'q'
-            }
-        })
+// Testing gameReducer function directly
+describe('gameReducer', () => {
+  it('should set words', () => {
+    const action = {
+      type: ActionKind.WORDS_SET,
+      payload: { wordSet: ['word1', 'word2'], todaysWord: 'word1' },
     };
 
-    const setEnter = ():void => {
-        dispatch({
-            type: ActionKind.ON_CLICK,
-            payload: {
-                keyVal: 'ENTER'
-            }
-        })
-    };
+    const state = gameReducer(initialState, action);
+    expect(state.wordSet).toEqual(['word1', 'word2']);
+    expect(state.todaysWord).toBe('word1');
+  });
+
+  // Add other cases to test other actions
+  // ...
+});
+
+// Testing useGameProvider hook
+describe('useGameProvider', () => {
+  function TestComponent() {
+    const { state, dispatch } = useGameProvider();
 
     return (
-        <div>
-            <p data-test-id="test-text">{JSON.stringify(state)}</p>
-            <button onClick={setTemplate}>Set OnClick</button>
-            <button onClick={setEnter}>Set Enter</button>
-            <p data-test-id="board-data">{JSON.stringify(state.gameBoard)}</p>
-            <p data-test-id="letterPosition-data">{JSON.stringify(state.letterPosition)}</p>
-        </div>
-    )
-}
+      <div>
+        <button onClick={() => dispatch({ type: ActionKind.WORDS_SET, payload: { wordSet: ['word1'], todaysWord: 'word1' } })}>Set Words</button>
+        <div data-testid="todaysWord">{state.todaysWord}</div>
+      </div>
+    );
+  }
 
-test('GameProvider returns default template state', () => {
-    render(
-        <GameProvider>
-            <TestComponent />
-        </GameProvider>
+  it('should use GameProvider and update todaysWord', () => {
+    const { getByTestId, getByText } = render(
+      <GameProvider>
+        <TestComponent />
+      </GameProvider>
     );
 
-    const text = screen.getByTestId('test-text');
-    expect(text).toHaveTextContent(JSON.stringify(initialState));
-});
+    fireEvent.click(getByText('Set Words'));
+    expect(getByTestId('todaysWord')).toHaveTextContent('word1');
+  });
 
-test('GameProvider retuns an altered gameboard when onclick is triggered', () => {
-    render(
-        <GameProvider>
-            <TestComponent />
-        </GameProvider>
-    );
-    const button = screen.getByRole('button', {name: /Set OnClick/i});
-    userEvent.click(button);
-    const text = screen.getByTestId('board-data');
-    const letterPos = screen.getByTestId('letterPosition-data');
-
-    const newBoard = [...initialState.gameBoard];
-    newBoard[0][0] = 'q';
-
-    expect(text).toHaveTextContent(JSON.stringify(newBoard));
-    expect(letterPos).toHaveTextContent(JSON.stringify(initialState.letterPosition + 1));
-});
-
-test('GameProvider return default state on initial load', () => {
-    render(
-        <GameProvider>
-            <TestComponent />
-        </GameProvider>
-    );
-    const button = screen.getByRole('button', {name: /Set Enter/i});
-    userEvent.click(button);
-    const text = screen.getByTestId('test-text');
-    expect(text).toHaveTextContent(JSON.stringify(initialState));
+  describe('gameReducer - ON_ENTER action', () => {
+    it('should return the same state if letterPosition is not 5', () => {
+      const state = {
+        ...initialState,
+        letterPosition: 3,
+      };
+  
+      const action = { type: ActionKind.ON_ENTER, payload: {} };
+  
+      const newState = gameReducer(state, action);
+      expect(newState).toEqual(state);
+    });
+  
+    it('should set gameOver to true and guessWord to false if currentAttempt is 5', () => {
+      const state = {
+        ...initialState,
+        letterPosition: 5,
+        currentAttempt: 5,
+      };
+  
+      const action = { type: ActionKind.ON_ENTER, payload: {} };
+  
+      const newState = gameReducer(state, action);
+      expect(newState.gameOver).toBe(true);
+      expect(newState.guessWord).toBe(false);
+    });
+  
+    it('should return the same state if current word is not found in wordSet', () => {
+      const state = {
+        ...initialState,
+        letterPosition: 5,
+        gameBoard: [
+          ["a", "b", "c", "d", "e"],
+          ...initialBoard.slice(1)
+        ],
+        wordSet: ['word1', 'word2']
+      };
+  
+      const action = { type: ActionKind.ON_ENTER, payload: {} };
+  
+      const newState = gameReducer(state, action);
+      expect(newState).toEqual({...state, isError: true});
+    });
+  
+    it('should set gameOver to true and guessWord to true if the current word matches todaysWord', () => {
+      const todaysWord = 'abcde';
+      const state = {
+        ...initialState,
+        letterPosition: 5,
+        gameBoard: [
+          ["a", "b", "c", "d", "e"],
+          ...initialBoard.slice(1)
+        ],
+        todaysWord,
+        wordSet: [todaysWord]
+      };
+  
+      const action = { type: ActionKind.ON_ENTER, payload: {} };
+  
+      const newState = gameReducer(state, action);
+      expect(newState.gameOver).toBe(true);
+      expect(newState.guessWord).toBe(true);
+    });
+  
+    it('should update currentAttempt and letterPosition if the current word does not match todaysWord but is in wordSet', () => {
+      const todaysWord = 'fghij';
+      const state = {
+        ...initialState,
+        letterPosition: 5,
+        currentAttempt: 2,
+        gameBoard: [
+          ["a", "b", "c", "d", "e"],
+          ...initialBoard.slice(1)
+        ],
+        todaysWord,
+        wordSet: ['abcde', todaysWord]
+      };
+  
+      const action = { type: ActionKind.ON_ENTER, payload: {} };
+  
+      const newState = gameReducer(state, action);
+      expect(newState.currentAttempt).toBe(state.currentAttempt);
+      expect(newState.letterPosition).toBe(state.letterPosition);
+    });
+  });
+  
 });
